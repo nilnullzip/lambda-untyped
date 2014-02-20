@@ -10,6 +10,7 @@ import qualified Data.Map as Map
 -- | The Lambda expression to parse
 
 theLambda = "S(S0)"
+--theLambda = "2"
 
 -- | Literal definitions
 

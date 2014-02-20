@@ -1,4 +1,5 @@
--- | Main entry point to the application.
+-- Lambda Calculus interpreter
+------------------------------
 
 module Main where
 
@@ -7,20 +8,21 @@ import Data.Char
 import System.Exit
 import qualified Data.Map as Map
 
--- | The Lambda expression to parse
+-- *** The Lambda expression to parse ***
 
 theLambda = "S(S0)"
 --theLambda = "2"
 
--- | Literal definitions
+-- Literal definitions
 
 identity = "Lz.z"
 zero = "Ls.Lz.z"
 one  = "Ls.Lz.sz"
 two  = "Ls.Lz.s(sz)"
 successor = "Lw.Ly.Lx.y(wyx)"
+predecessor = "Ln.Lf.Lx.n(Lg.Lh.h(gf))(Lu.x)(Lu.u)"
 
--- | The syntax tree
+-- The syntax tree
 
 data Expr =
       Var Char
@@ -28,66 +30,71 @@ data Expr =
     | Apply Expr Expr
   deriving (Show, Eq)
 
--- | Parse and return syntax tree
+-- Parse and return AST
+-----------------------
 
 parse :: String -> Expr
 parse s
     | s == "" = error ("parse: syntax error: empty string")
-    | otherwise = parseApply t1 r1
+    | otherwise = fst (parseApply t1 r1)
     where (t1,r1) = parseTerm s
 
--- | Left associative expression application
+-- Left associative expression application
 
-parseApply :: Expr -> String -> Expr
+parseApply :: Expr -> String -> (Expr, String)
 
 parseApply acc s
-    | s == "" = {- trace "parseLeft: EOS" -} acc
+    | s == "" = {- trace "parseLeft: EOS" -} (acc, s)
+    | head s == ')' = (acc, s)
     | otherwise = {- trace "parseLeft: Apply" -} (parseApply (Apply acc t1) r1)
     where (t1,r1) = parseTerm s
 
--- | Parse a term
+-- Parse a term
 
 parseTerm :: String -> (Expr, String)
 
--- | Parens:
+-- Parens:
 
 parseTerm ('(':s)
     | r /= "" && (head r) == ')' = ((parse e) , tail r)
     where (e,r) = break (== ')') s
 --    error ("parseTerm: e,r = " ++ e ++ " " ++ r)
 
--- | Lambda:
+-- Lambda:
 
 parseTerm ('L':x:'.':e) | (isLower x) = (Lambda x (parse e), "")
 
--- | Variable:
+-- Variable:
 
 parseTerm (x:r) | (isLower x) = (Var x, r)
 
--- | Literals :
+-- Literals :
 
 parseTerm (x:r) | x == 'I' = (parse(identity), r)
 parseTerm (x:r) | x == '0' = (parse(zero), r)
 parseTerm (x:r) | x == '1' = (parse(one), r)
 parseTerm (x:r) | x == '2' = (parse(two), r)
 parseTerm (x:r) | x == 'S' = (parse(successor), r)
+parseTerm (x:r) | x == 'P' = (parse(predecessor), r)
 
--- | Syntax error:
+-- Syntax error:
 
 parseTerm(s) = error ("parseTerm: syntax error: " ++ s)
 
--- | Evaluate
-
-beta :: Expr -> (Map.Map Char Expr) -> Expr
-beta (Apply (Lambda x e) a) env = eval e (Map.insert x (eval a env) env)
-beta e env = e
+-- Evaluate AST
+---------------
 
 eval :: Expr -> (Map.Map Char Expr) -> Expr
 eval (Var x) env = {- trace ("eval: " ++ show x) -} Map.findWithDefault (Var x) x env 
 eval (Lambda x e) env = {- trace ("eval: lambda " ++ show x) -} (Lambda x (eval e env))
 eval (Apply a b) env = {- trace ("eval: apply") -} beta (Apply (eval a env) (eval b env)) env
 
--- | The main entry point.
+beta :: Expr -> (Map.Map Char Expr) -> Expr
+beta (Apply (Lambda x e) a) env = eval e (Map.insert x (eval a env) env)
+beta e env = e
+
+-- The main entry point
+-----------------------
 
 main :: IO ()
 main = do

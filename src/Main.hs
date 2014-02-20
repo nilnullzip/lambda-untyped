@@ -1,67 +1,69 @@
 -- | Main entry point to the application.
+
 module Main where
+
 
 import Debug.Trace
 import Data.Char
+import System.Exit
 
+-- | The program to parse
 
--- foo :: String -> String
--- foo "x" = "foo"
-
-data Foo = A | B
-    deriving (Show, Eq)
-
-x = (A == B)
+theProgram = "(Lx.xy)"
 
 -- | The main entry point.
 main :: IO ()
 main = do
     putStrLn "Juan's Lambda calculus interpreter!"
-    print (parseLeft EmptyExpression "Lx.Xx")
+    print (parse theProgram)
 
--- The syntax tree
+-- | The syntax tree
 
-data Variable = Variable Char
+data Id = Id Char
   deriving (Show, Eq)
 
-data Expression =
-    Terminal Variable
-    | Lambda Variable Expression
-    | Application Expression Expression
-    | EmptyExpression
+data Expr =
+    Var Char
+    | Lambda Char Expr
+    | Apply Expr Expr
   deriving (Show, Eq)
 
--- Parse expression and return syntax tree
+-- | Parse and return syntax tree
 
-parse :: String -> Expression
-parse s = parseLeft EmptyExpression s
+parse :: String -> Expr
+parse s
+    | s == "" = error ("Syntax error: " ++ s)
+    | otherwise = parseApply t1 r1
+    where (t1,r1) = parseTerm s
 
--- Left associative expression list
+-- | Left associative expression application
 
-parseLeft :: Expression -> String -> Expression
+parseApply :: Expr -> String -> Expr
 
-parseLeft acc s
+parseApply acc s
     | s == "" = trace "parseLeft: EOS" acc
-    | acc == EmptyExpression = trace "parseLeft: Begin" (parseLeft t1 r1)
-    | otherwise = trace "parseLeft: Application" (parseLeft (Application acc t1) r1)
-    where (t1,r1) = parseOne s
+    | otherwise = trace "parseLeft: Apply" (parseApply (Apply acc t1) r1)
+    where (t1,r1) = parseTerm s
 
--- Parse one term
+-- | Parse a term
 
-parseOne :: String -> (Expression, String)
+parseTerm :: String -> (Expr, String)
 
-parseOne ('(':s) =
-    let (e,r) = break (== ')') s in
-    ((parse e) , r)
+-- | Parens:
 
--- Lambda:
+parseTerm ('(':s)
+    | r /= "" && (head r) == ')' = ((parse e) , tail r)
+    where (e,r) = break (== ')') s
+--    error ("parseTerm: e,r = " ++ e ++ " " ++ r)
 
-parseOne ('L':x:'.':e) | (isLower x) = (Lambda (Variable x) (parse e), "")
+-- | Lambda:
 
--- Terminal symbol
+parseTerm ('L':x:'.':e) | (isLower x) = (Lambda x (parse e), "")
 
-parseOne (x:r) | (isLower x) = (Terminal (Variable x), r)
+-- | Variable:
 
--- Syntax error
+parseTerm (x:r) | (isLower x) = (Var x, r)
 
--- parseOne (s) = trace ("Syntax error at: " ++ s) (EmptyExpression, "")
+-- | Syntax error:
+
+parseTerm(s) = error ("Syntax error: " ++ s)

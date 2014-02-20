@@ -7,7 +7,6 @@ import Debug.Trace
 import Data.Char
 import System.Exit
 import qualified Data.Map as Map
-import Data.Typeable
 
 -- | The Lambda expression to parse
 
@@ -24,7 +23,8 @@ main :: IO ()
 main = do
     putStrLn "Juan's Lambda calculus interpreter!"
     putStrLn ""
-    print ("The lambda expression:" ++ theLambda)
+    putStrLn "The lambda expression:"
+    print theLambda
     putStrLn ""
     putStrLn "The AST:"
     print (parse theLambda)
@@ -54,7 +54,7 @@ parseApply :: Expr -> String -> Expr
 
 parseApply acc s
     | s == "" = {- trace "parseLeft: EOS" -} acc
-    | otherwise = trace "parseLeft: Apply" (parseApply (Apply acc t1) r1)
+    | otherwise = {- trace "parseLeft: Apply" -} (parseApply (Apply acc t1) r1)
     where (t1,r1) = parseTerm s
 
 -- | Parse a term
@@ -91,10 +91,10 @@ parseTerm(s) = error ("parseTerm: syntax error: " ++ s)
 -- | Evaluate
 
 beta :: Expr -> (Map.Map Char Expr) -> Expr
-beta (Apply (Lambda x e) a) env = trace ("eval: apply lambda: " ++ show x) (eval e (Map.insert x (eval a env) env))
+beta (Apply (Lambda x e) a) env = eval e (Map.insert x (eval a env) env)
 beta e env = e
 
 eval :: Expr -> (Map.Map Char Expr) -> Expr
-eval (Var x) env = trace ("eval: " ++ show x) Map.findWithDefault (Var x) x env 
+eval (Var x) env = {- trace ("eval: " ++ show x) -} Map.findWithDefault (Var x) x env 
 eval (Lambda x e) env = {- trace ("eval: lambda " ++ show x) -} (Lambda x (eval e env))
 eval (Apply a b) env = {- trace ("eval: apply") -} beta (Apply (eval a env) (eval b env)) env

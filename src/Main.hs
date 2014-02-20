@@ -7,6 +7,7 @@ import Debug.Trace
 import Data.Char
 import System.Exit
 import qualified Data.Map as Map
+import Data.Typeable
 
 -- | The Lambda expression to parse
 
@@ -16,12 +17,13 @@ one  = "Ls.Lz.sz"
 two  = "Ls.Lz.s(sz)"
 successor = "Lw.Ly.Lx.y(wyx)"
 
-theLambda = "S0"
+theLambda = "S(S0)"
 
 -- | The main entry point.
 main :: IO ()
 main = do
     putStrLn "Juan's Lambda calculus interpreter!"
+--    print (typeOf (Var 'x')) 
     print theLambda
     print (parse theLambda)
     print (eval (parse theLambda) env)
@@ -88,17 +90,18 @@ parseTerm(s) = error ("parseTerm: syntax error: " ++ s)
 -- env2 = Map.insert 'b' (Var 'x') env
 env = Map.empty
 
-
 weval :: Expr -> fromList -> Expr
 weval (Var x) env = {- trace ("eval: " ++ show x) -} (Var x)
 weval (Lambda x e) env = {- trace ("eval: lambda " ++ show x) -} (Lambda x (weval e env))
 weval (Apply a b) env = {- trace ("eval: apply") -} (Apply (weval a env) (weval b env))
 
+beta :: Expr -> (Map.Map Char Expr) -> Expr
+beta (Apply (Lambda x e) a) env = trace ("eval: apply lambda: " ++ show x) (eval e (Map.insert x (eval a env) env))
+beta e env = e
 
 eval :: Expr -> (Map.Map Char Expr) -> Expr
 eval (Var x) env = trace ("eval: " ++ show x) Map.findWithDefault (Var x) x env 
-eval (Apply (Lambda x e) a) env = trace ("eval: apply lambda: " ++ show x) (eval e (Map.insert x (eval a env) env))
 eval (Lambda x e) env = {- trace ("eval: lambda " ++ show x) -} (Lambda x (eval e env))
-eval (Apply a b) env = {- trace ("eval: apply") -} (Apply (eval a env) (eval b env))
+eval (Apply a b) env = {- trace ("eval: apply") -} beta (Apply (eval a env) (eval b env)) env
 
 -- eval (Apply (Lambda x e) a) env = {- trace ("eval: apply") -} (eval e (Map.insert x (Var 'x') env))

@@ -10,15 +10,10 @@ import qualified Data.Map as Map
 
 -- | The Lambda expression to parse
 
-identity = "Lz.z"
-zero = "Ls.Lz.z"
-one  = "Ls.Lz.sz"
-two  = "Ls.Lz.s(sz)"
-successor = "Lw.Ly.Lx.y(wyx)"
-
 theLambda = "S(S0)"
 
 -- | The main entry point.
+
 main :: IO ()
 main = do
     putStrLn "Juan's Lambda calculus interpreter!"
@@ -87,7 +82,15 @@ parseTerm (x:r) | x == 'S' = (parse(successor), r)
 -- | Syntax error:
 
 parseTerm(s) = error ("parseTerm: syntax error: " ++ s)
- 
+
+-- | Literal definitions
+
+identity = "Lz.z"
+zero = "Ls.Lz.z"
+one  = "Ls.Lz.sz"
+two  = "Ls.Lz.s(sz)"
+successor = "Lw.Ly.Lx.y(wyx)"
+
 -- | Evaluate
 
 beta :: Expr -> (Map.Map Char Expr) -> Expr

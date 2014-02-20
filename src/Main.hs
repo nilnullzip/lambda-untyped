@@ -7,20 +7,24 @@ import Debug.Trace
 import Data.Char
 import System.Exit
 
--- | The program to parse
+-- | The Lambda expression to parse
 
-theProgram = "(Lx.xy)"
+identity = "Lz.z"
+zero = "Ls.Lz.z"
+one  = "Ls.Lz.s(z)"
+two  = "Ls.Lz.s(s(z))"
+successor = "Lw.Ly.Lx.y(wyx)"
+
+--theLambda = "Lx.xyzLa.ab"
+theLambda = "S"
 
 -- | The main entry point.
 main :: IO ()
 main = do
     putStrLn "Juan's Lambda calculus interpreter!"
-    print (parse theProgram)
+    print (parse theLambda)
 
 -- | The syntax tree
-
-data Id = Id Char
-  deriving (Show, Eq)
 
 data Expr =
     Var Char
@@ -32,7 +36,7 @@ data Expr =
 
 parse :: String -> Expr
 parse s
-    | s == "" = error ("Syntax error: " ++ s)
+    | s == "" = error ("parse: syntax error: empty string")
     | otherwise = parseApply t1 r1
     where (t1,r1) = parseTerm s
 
@@ -64,6 +68,12 @@ parseTerm ('L':x:'.':e) | (isLower x) = (Lambda x (parse e), "")
 
 parseTerm (x:r) | (isLower x) = (Var x, r)
 
+-- | Literals :
+
+parseTerm (x:r) | x == 'I' = (parse(identity), r)
+parseTerm (x:r) | x == '0' = (parse(zero), r)
+parseTerm (x:r) | x == 'S' = (parse(successor), r)
+
 -- | Syntax error:
 
-parseTerm(s) = error ("Syntax error: " ++ s)
+parseTerm(s) = error ("parseTerm: syntax error: " ++ s)

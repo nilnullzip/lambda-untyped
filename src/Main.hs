@@ -2,7 +2,6 @@
 
 module Main where
 
-
 import Debug.Trace
 import Data.Char
 import System.Exit
@@ -12,20 +11,13 @@ import qualified Data.Map as Map
 
 theLambda = "S(S0)"
 
--- | The main entry point.
+-- | Literal definitions
 
-main :: IO ()
-main = do
-    putStrLn "Juan's Lambda calculus interpreter!"
-    putStrLn ""
-    putStrLn "The lambda expression:"
-    print theLambda
-    putStrLn ""
-    putStrLn "The AST:"
-    print (parse theLambda)
-    putStrLn ""
-    putStrLn "Fully reduced AST:"
-    print (eval (parse theLambda) Map.empty)
+identity = "Lz.z"
+zero = "Ls.Lz.z"
+one  = "Ls.Lz.sz"
+two  = "Ls.Lz.s(sz)"
+successor = "Lw.Ly.Lx.y(wyx)"
 
 -- | The syntax tree
 
@@ -83,14 +75,6 @@ parseTerm (x:r) | x == 'S' = (parse(successor), r)
 
 parseTerm(s) = error ("parseTerm: syntax error: " ++ s)
 
--- | Literal definitions
-
-identity = "Lz.z"
-zero = "Ls.Lz.z"
-one  = "Ls.Lz.sz"
-two  = "Ls.Lz.s(sz)"
-successor = "Lw.Ly.Lx.y(wyx)"
-
 -- | Evaluate
 
 beta :: Expr -> (Map.Map Char Expr) -> Expr
@@ -101,3 +85,18 @@ eval :: Expr -> (Map.Map Char Expr) -> Expr
 eval (Var x) env = {- trace ("eval: " ++ show x) -} Map.findWithDefault (Var x) x env 
 eval (Lambda x e) env = {- trace ("eval: lambda " ++ show x) -} (Lambda x (eval e env))
 eval (Apply a b) env = {- trace ("eval: apply") -} beta (Apply (eval a env) (eval b env)) env
+
+-- | The main entry point.
+
+main :: IO ()
+main = do
+    putStrLn "Juan's Lambda calculus interpreter!"
+    putStrLn ""
+    putStrLn "The lambda expression:"
+    print theLambda
+    putStrLn ""
+    putStrLn "The AST:"
+    print (parse theLambda)
+    putStrLn ""
+    putStrLn "Fully reduced AST:"
+    print (eval (parse theLambda) Map.empty)

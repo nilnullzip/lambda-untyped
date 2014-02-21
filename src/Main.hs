@@ -10,8 +10,32 @@ import qualified Data.Map as Map
 
 -- *** The Lambda expression to parse ***
 
-theLambda = "S0"
---theLambda = "2"
+{-
+
+Eval problems:
+
+1) P1 works, but PS0 does not. It's because of the difference in variable names between 1 and S0.
+
+Fundumental reason:
+
+theLambda = "(Lx.Lx.x)z" -- wrong = Lx.z
+theLambda = "(Ly.Lx.x)z" -- right = Lx.x
+
+In the first case, outer Lx substitutes z in the inner lambda expression, which is incorrect.
+This is because the evaluation of Lx.x does not include binding of x in the unapplied lambda expression case.
+
+2) When argment is passed, it should use a closure for values in its scope. I currently
+just blindly substitue, which gives wrong result:
+
+theLambda = "(Lx.Lz.xz)z" -- wrong = Lz.zz
+theLambda = "(Lx.Ly.xy)z" -- right = Ly.zy
+
+-}
+
+theLambda = "(Lx.Lx.x)z" -- wrong 
+-- theLambda = "(Lx.Ly.xy)z" -- right
+-- theLambda = "P(Ly.Lx.yx)"
+-- theLambda = "2"
 
 -- Literal definitions
 

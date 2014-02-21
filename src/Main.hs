@@ -10,7 +10,7 @@ import qualified Data.Map as Map
 
 -- *** The Lambda expression to parse ***
 
-theLambda = "S(S0)"
+theLambda = "S0"
 --theLambda = "2"
 
 -- Literal definitions
@@ -28,6 +28,7 @@ data Expr =
       Var Char
     | Lambda Char Expr
     | Apply Expr Expr
+    | Empty
   deriving (Show, Eq)
 
 -- Parse and return AST
@@ -36,18 +37,19 @@ data Expr =
 parse :: String -> Expr
 parse s
     | s == "" = error ("parse: syntax error: empty string")
-    | otherwise = fst (parseApply t1 r1)
-    where (t1,r1) = parseTerm s
+    | otherwise = fst (parseApply t r)
+    where (t,r) = parseTerm s
 
 -- Left associative expression application
 
 parseApply :: Expr -> String -> (Expr, String)
 
 parseApply acc s
-    | s == "" = {- trace "parseLeft: EOS" -} (acc, s)
+    | s == "" = {- trace "parseLeft: EOS" -} (acc, "")
     | head s == ')' = (acc, s)
-    | otherwise = {- trace "parseLeft: Apply" -} (parseApply (Apply acc t1) r1)
-    where (t1,r1) = parseTerm s
+    | acc == Empty = (parseApply t r)
+    | otherwise = {- trace "parseLeft: Apply" -} (parseApply (Apply acc t) r)
+    where (t,r) = parseTerm s
 
 -- Parse a term
 
@@ -56,13 +58,19 @@ parseTerm :: String -> (Expr, String)
 -- Parens:
 
 parseTerm ('(':s)
-    | r /= "" && (head r) == ')' = ((parse e) , tail r)
-    where (e,r) = break (== ')') s
+    | r == "" = error ("parseTerm: empty string after left paren " ++ show e)
+    | head r == ')' = (e, tail r)
+    | otherwise = error ("parseTerm: missing right paren: " ++ r)
+    where (e,r) = parseApply Empty s
+
+--    | r /= "" && (head r) == ')' = ((parse e) , tail r)
+--    where (e,r) = break (== ')') s
 --    error ("parseTerm: e,r = " ++ e ++ " " ++ r)
 
 -- Lambda:
 
-parseTerm ('L':x:'.':e) | (isLower x) = (Lambda x (parse e), "")
+parseTerm ('L':x:'.':e) | (isLower x) =
+    let (exp, r) = parseApply Empty e in (Lambda x exp, r)
 
 -- Variable:
 

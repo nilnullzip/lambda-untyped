@@ -32,10 +32,8 @@ theLambda = "(Lx.Ly.xy)z" -- right = Ly.zy
 
 -}
 
-theLambda = "(Lx.Lx.x)z" -- wrong 
--- theLambda = "(Lx.Ly.xy)z" -- right
--- theLambda = "P(Ly.Lx.yx)"
--- theLambda = "2"
+expected = "2"
+theLambda = "S(S0)"
 
 -- Literal definitions
 
@@ -50,6 +48,7 @@ predecessor = "Ln.Lf.Lx.n(Lg.Lh.h(gf))(Lu.x)(Lu.u)"
 
 data Expr =
       Var Char
+    | Unbound Char
     | Lambda Char Expr
     | Apply Expr Expr
     | Empty
@@ -116,13 +115,34 @@ parseTerm(s) = error ("parseTerm: syntax error: " ++ s)
 -- Evaluate AST
 ---------------
 
+-- expression and environment returns expression:
+
 eval :: Expr -> (Map.Map Char Expr) -> Expr
-eval (Var x) env = {- trace ("eval: " ++ show x) -} Map.findWithDefault (Var x) x env 
-eval (Lambda x e) env = {- trace ("eval: lambda " ++ show x) -} (Lambda x (eval e env))
+
+-- variable, lookup variable in environment:
+
+eval (Var x) env = {- trace ("eval: " ++ show x) -} Map.findWithDefault (Unbound x) x env
+
+eval (Unbound x) env = Unbound x
+
+-- lambda definition, insert variable in environment and evaluate body:
+
+eval (Lambda x e) env = {- trace ("eval: lambda " ++ show x) -} (Lambda x (eval e (Map.insert x (Var x) env)))
+
+-- application, evaluate both parts then call beta reduction
+
 eval (Apply a b) env = {- trace ("eval: apply") -} beta (Apply (eval a env) (eval b env)) env
 
+-- beta reduction, i.e. application
+
 beta :: Expr -> (Map.Map Char Expr) -> Expr
+
+-- if lambda application, then variable substituation and evaluate:
+
 beta (Apply (Lambda x e) a) env = eval e (Map.insert x (eval a env) env)
+
+-- otherwise no further reduction
+
 beta e env = e
 
 -- The main entry point
@@ -135,8 +155,14 @@ main = do
     putStrLn "The lambda expression:"
     print theLambda
     putStrLn ""
+    putStrLn "The expected AST:"
+    print (parse expected)
+    putStrLn ""
     putStrLn "The AST:"
     print (parse theLambda)
+    putStrLn ""
+    putStrLn "The expected reduced AST:"
+    print (eval (parse expected) Map.empty)
     putStrLn ""
     putStrLn "Fully reduced AST:"
     print (eval (parse theLambda) Map.empty)

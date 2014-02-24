@@ -14,26 +14,19 @@ import qualified Data.Map as Map
 
 Eval problems:
 
-1) P1 works, but PS0 does not. It's because of the difference in variable names between 1 and S0.
+expected = "P((Lw.Ly.Lc.y(wyc))0)" -- good result
+theLambda =  "P((Lw.Ly.Lx.y(wyx))0)" -- bad result
 
-Fundumental reason:
-
-theLambda = "(Lx.Lx.x)z" -- wrong = Lx.z
-theLambda = "(Ly.Lx.x)z" -- right = Lx.x
-
-In the first case, outer Lx substitutes z in the inner lambda expression, which is incorrect.
-This is because the evaluation of Lx.x does not include binding of x in the unapplied lambda expression case.
-
-2) When argment is passed, it should use a closure for values in its scope. I currently
-just blindly substitue, which gives wrong result:
-
-theLambda = "(Lx.Lz.xz)z" -- wrong = Lz.zz
-theLambda = "(Lx.Ly.xy)z" -- right = Ly.zy
+Still some problem with variable naming. Substituting c for x above works correctly.
 
 -}
 
-expected = "2"
-theLambda = "S(S0)"
+-- expected =  "(Lw.Ly.Lx.y(wyx))0"
+-- expected =  "P((Lw.Ly.Lx.y(wyx))0)" -- bad result
+-- theLambda = "P((Lw.Ly.Lc.y(wyc))0)" -- good result
+
+expected = "P((Lw.Ly.Lc.y(wyc))0)" -- good result
+theLambda =  "P((Lw.Ly.Lx.y(wyx))0)" -- bad result
 
 -- Literal definitions
 

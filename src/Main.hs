@@ -17,6 +17,11 @@ Eval problems:
 expected = "P((Lw.Ly.Lc.y(wyc))0)" -- good result
 theLambda =  "P((Lw.Ly.Lx.y(wyx))0)" -- bad result
 
+Simplified:
+
+expected  = "Lx.(Lc.cf)(Lu.x)" -- good
+theLambda = "Lx.(Lx.xf)(Lu.x)" -- bad
+
 Still some problem with variable naming. Substituting c for x above works correctly.
 
 -}
@@ -25,8 +30,15 @@ Still some problem with variable naming. Substituting c for x above works correc
 -- expected =  "P((Lw.Ly.Lx.y(wyx))0)" -- bad result
 -- theLambda = "P((Lw.Ly.Lc.y(wyc))0)" -- good result
 
-expected = "P((Lw.Ly.Lc.y(wyc))0)" -- good result
-theLambda =  "P((Lw.Ly.Lx.y(wyx))0)" -- bad result
+--expected  = "Lf.Lx.(Ly.Lc.yc)(Lg.Lh.h(gf))(Lu.x)(Lu.u)" -- good result
+--theLambda = "Lf.Lx.(Ly.Lx.yx)(Lg.Lh.h(gf))(Lu.x)(Lu.u)" -- bad result
+
+--theLambda = "P1"
+--expected  = "Lx.(Lx.(Lg.Lh.h(gf))x)(Lu.x)"
+--theLambda = "Lx.(Lc.(Lg.Lh.h(gf))c)(Lu.x)"
+
+expected  = "Lx.(Lc.cf)(Lu.x)" -- good
+theLambda = "Lx.(Lx.xf)(Lu.x)" -- bad
 
 -- Literal definitions
 
@@ -114,7 +126,7 @@ eval :: Expr -> (Map.Map Char Expr) -> Expr
 
 -- variable, lookup variable in environment:
 
-eval (Var x) env = {- trace ("eval: " ++ show x) -} Map.findWithDefault (Unbound x) x env
+eval (Var x) env = trace ("eval Var: " ++ show (x, env)) (Map.findWithDefault (Unbound x) x env)
 
 eval (Unbound x) env = Unbound x
 
@@ -124,7 +136,7 @@ eval (Lambda x e) env = {- trace ("eval: lambda " ++ show x) -} (Lambda x (eval 
 
 -- application, evaluate both parts then call beta reduction
 
-eval (Apply a b) env = {- trace ("eval: apply") -} beta (Apply (eval a env) (eval b env)) env
+eval (Apply a b) env = trace ("eval: apply" ++ show (a,b)) (beta (Apply (eval a env) (eval b env)) env)
 
 -- beta reduction, i.e. application
 

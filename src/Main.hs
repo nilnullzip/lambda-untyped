@@ -37,14 +37,26 @@ Still some problem with variable naming. Substituting c for x above works correc
 --expected  = "Lx.(Lx.(Lg.Lh.h(gf))x)(Lu.x)"
 --theLambda = "Lx.(Lc.(Lg.Lh.h(gf))c)(Lu.x)"
 
--- expected  = "Lx.(Lc.cf)(Lu.x)" -- good
--- theLambda = "Lx.(Lx.xf)(Lu.x)" -- bad
+--expected  = "Lx.(Lc.cf)(Lu.x)" -- good
+--theLambda = "Lx.(Lx.xf)(Lu.x)" -- bad
 
 -- expected =  "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)"
 -- theLambda = "Lx.(Ls.Lx.s)(Lu.x)(Lu.u)" -- fail
 
-expected = "2"
-theLambda = "S(S0)"
+--expected = "Ly.(0y)"
+--theLambda = "(Lw.Ly.(wy))0" -- fail
+
+--expected = "1"
+--theLambda = "S0"
+
+--expected = "2"
+--theLambda = "S(S0)"
+
+expected = "0"
+theLambda = "P(1)"
+
+--expected = "S0"
+--theLambda = "P(S0)"
 
 --theLambda = "(Ln.Lf.Lc.n(Lg.Lh.h(gf))(Lu.c)(Lu.u))(Ls.Lx.sx)" -- good
 
@@ -66,7 +78,7 @@ data Expr =
     | Empty
     | Unbound Char
     | Bound Char
-    | Lambdac Char Expr (Map.Map Char Expr)
+    | Closure Char Expr (Map.Map Char Expr)
   deriving (Show, Eq)
 
 -- Parse and return AST
@@ -130,6 +142,12 @@ parseTerm(s) = error ("parseTerm: syntax error: " ++ s)
 -- Evaluate AST
 ---------------
 
+-- helper
+
+isNotBound :: Expr -> Bool
+isNotBound (Bound _) = False
+isNotBound _ = True
+
 -- expression and environment returns expression:
 
 eval :: Expr -> (Map.Map Char Expr) -> Expr
@@ -140,47 +158,59 @@ eval (Var x) env =
     -- trace ("eval Var: " ++ show (x, env))
     -- (Map.findWithDefault (Unbound x) x env)
     let
-        rval = (Map.findWithDefault (Unbound x) x env) -- shouldn't really have a default value
+        rval = (Map.findWithDefault (Unbound x) x env)
     in
     trace ("eval Var: " ++ show x ++ " = " ++ show rval)
     rval 
 
 eval (Bound x) env =
     let
-        rval = (Map.findWithDefault (Unbound x) x env) -- shouldn't really have a default value
+        rval = (Map.findWithDefault (Bound x) x env)
+        --lookup = (Map.findWithDefault Empty x env)
+        --rval = if lookup /= Empty then lookup else error ("eval Bound: variable lookup failed.")
     in
     trace ("eval Bound: " ++ show x ++ " = " ++ show rval)
     rval 
 
 eval (Unbound x) env = Unbound x
 
--- lambda definition, insert variable in environment, evaluate body, return closure:
+-- lambda definition, need to find bound and unbound and then return closure:
 
 eval (Lambda x e) env =
     let
         env2 = (Map.insert x (Bound x) env)
-        rval = (Lambdac x (eval e env2) env )
+        e2 = (eval e env2) -- is this necessary? Can't we just leave unevaluated?
+        --rval = (Closure x e2 env2 )
+        env3 = Map.filter (isNotBound) env2
+        rval = (Closure x e2 env3)
     in
     trace ("eval Lambda: " ++ show x ++ " " ++ show e
         ++ "\n  env: " ++ show env
+        ++ "\n  env3: " ++ show env3
         ++ "\n  rval: " ++ show rval)
     rval
     -- (Lambda x (eval e (Map.insert x (Bound x) env))  )
 
 -- evaluate closure. *** Not clear whether closure or passed environment should be used here! Both work for different cases.
 
-eval (Lambdac x e c) env =
+eval (Closure x e c) env =
     let
         cenv = Map.union c env
-        env2 = Map.insert x (Bound x) env
-        e2 = (eval e env2)
-        rval = (Lambdac x e2 env)
+        --env2 = Map.insert x (Bound x) env
+        --e2 = (eval e env2)
+        --rval = (Closure x e2 env)
+        e2 = (eval e cenv)
+        rval = (Closure x e2 cenv)
     in
-    trace ("eval Lambdac: " ++ (show x) ++ (show e)
-        ++ "\n  e2: " ++ show e2
-        ++ "\n  env: " ++ (show (Map.findWithDefault (Var 'Z') x env2))
+    trace ("eval Closure: " ++ (show x)
+        ++ "\n  e: " ++ show e
+        -- ++ "\n  env: " ++ (show (Map.findWithDefault Empty x env2))
+        ++ "\n  c: " ++ (show c)
+        ++ "\n  cenv: " ++ (show cenv)
         ++ "\n  returns: " ++ show (strip rval))
     rval
+
+-- eval (Closure x e c) env = Closure x e c
 
 -- application, evaluate both parts then call beta reduction
 
@@ -199,17 +229,16 @@ beta :: Expr -> (Map.Map Char Expr) -> Expr
 
 -- if lambda application, then variable substituation and evaluate:
 
-beta (Apply (Lambdac x e closure) a) env =
+beta (Apply (Closure x e c) a) env =
     let
-        env2 = (Map.insert x (eval a env) (Map.union closure env))
+        env2 = (Map.insert x (eval a env) (Map.union c env))
         rval = (eval e env2)
     in
-    trace ("beta: " ++ show x ++ " = " ++ show e
-        ++ "\n  env: " ++ show env2
+    trace ("beta: " ++ show x ++ " = " ++ show a
+        ++ "\n  e: " ++ show e
+        ++ "\n  env2: " ++ show env2
         ++ "\n  returns: " ++ show (strip rval) )
-    --(eval e (Map.insert x (eval a env) (Map.union closure Map.empty)))
     rval
-    --(eval e (Map.insert x (eval a env) env))
 
 --beta (Apply (Lambda x e) a) env =
 --    -- trace ("lambdac application: " ++ show (Map.insert x (eval a env) env))
@@ -223,7 +252,7 @@ beta e env = e
 -- strip closure for nicer printing
 
 strip :: Expr -> Expr
-strip (Lambdac x e c) = (Lambda x (strip e))
+strip (Closure x e c) = (Lambda x (strip e))
 strip e = e
 
 -- The main entry point

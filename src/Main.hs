@@ -37,8 +37,11 @@ Still some problem with variable naming. Substituting c for x above works correc
 --expected  = "Lx.(Lx.(Lg.Lh.h(gf))x)(Lu.x)"
 --theLambda = "Lx.(Lc.(Lg.Lh.h(gf))c)(Lu.x)"
 
-expected  = "Lx.(Lc.cf)(Lu.x)" -- good
-theLambda = "Lx.(Lx.xf)(Lu.x)" -- bad
+-- expected  = "Lx.(Lc.cf)(Lu.x)" -- good
+-- theLambda = "Lx.(Lx.xf)(Lu.x)" -- bad
+
+expected = "0"
+theLambda = "P(S0)"
 
 -- Literal definitions
 
@@ -54,7 +57,9 @@ predecessor = "Ln.Lf.Lx.n(Lg.Lh.h(gf))(Lu.x)(Lu.u)"
 data Expr =
       Var Char
     | Unbound Char
+    | Bound Char
     | Lambda Char Expr
+    | Lambdac Char Expr (Map.Map Char Expr)
     | Apply Expr Expr
     | Empty
   deriving (Show, Eq)
@@ -126,17 +131,36 @@ eval :: Expr -> (Map.Map Char Expr) -> Expr
 
 -- variable, lookup variable in environment:
 
-eval (Var x) env = trace ("eval Var: " ++ show (x, env)) (Map.findWithDefault (Unbound x) x env)
+eval (Var x) env =
+    -- trace ("eval Var: " ++ show (x, env))
+    (Map.findWithDefault (Unbound x) x env)
+
+eval (Bound x) env =
+--    Bound x
+    -- trace ("eval Bound: " ++ show (x, env))
+    (Map.findWithDefault (Unbound x) x env) -- shouldn't really have a default value
 
 eval (Unbound x) env = Unbound x
 
 -- lambda definition, insert variable in environment and evaluate body:
 
-eval (Lambda x e) env = {- trace ("eval: lambda " ++ show x) -} (Lambda x (eval e (Map.insert x (Var x) env)))
+eval (Lambda x e) env =
+    -- trace ("eval: lambda " ++ show x)
+    (Lambdac x (eval e (Map.insert x (Bound x) env)) env )
+    -- (Lambda x (eval e (Map.insert x (Bound x) env))  )
+
+eval (Lambdac x e c) env =
+    -- trace ("eval: lambda " ++ show x)
+    (Lambdac x (eval e (Map.insert x (Bound x) env)) env )
 
 -- application, evaluate both parts then call beta reduction
 
-eval (Apply a b) env = trace ("eval: apply" ++ show (a,b)) (beta (Apply (eval a env) (eval b env)) env)
+eval (Apply a b) env =
+    -- trace ("eval: apply" ++ show (a,b))
+    (beta (Apply (eval a env) (eval b env)) env)
+
+eval e env =
+    error ("eval: cannot match: " ++ show e)
 
 -- beta reduction, i.e. application
 
@@ -144,11 +168,24 @@ beta :: Expr -> (Map.Map Char Expr) -> Expr
 
 -- if lambda application, then variable substituation and evaluate:
 
-beta (Apply (Lambda x e) a) env = eval e (Map.insert x (eval a env) env)
+beta (Apply (Lambdac x e closure) a) env = 
+    -- trace ("lambdac application: " ++ show (Map.insert x (eval a env) closure))
+    (eval e (Map.insert x (eval a env) (Map.union closure env)))
+    --(eval e (Map.insert x (eval a env) env))
+
+beta (Apply (Lambda x e) a) env =
+    -- trace ("lambdac application: " ++ show (Map.insert x (eval a env) env))
+    (eval e (Map.insert x (eval a env) env))
 
 -- otherwise no further reduction
 
 beta e env = e
+
+-- strip closure for nicer printing
+
+strip :: Expr -> Expr
+strip (Lambdac x e c) = (Lambda x (strip e))
+strip e = e
 
 -- The main entry point
 -----------------------
@@ -167,7 +204,7 @@ main = do
     print (parse theLambda)
     putStrLn ""
     putStrLn "The expected reduced AST:"
-    print (eval (parse expected) Map.empty)
+    print (strip (eval (parse expected) Map.empty))
     putStrLn ""
     putStrLn "Fully reduced AST:"
-    print (eval (parse theLambda) Map.empty)
+    print (strip (eval (parse theLambda) Map.empty))

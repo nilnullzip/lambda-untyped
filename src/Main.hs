@@ -40,8 +40,13 @@ Still some problem with variable naming. Substituting c for x above works correc
 -- expected  = "Lx.(Lc.cf)(Lu.x)" -- good
 -- theLambda = "Lx.(Lx.xf)(Lu.x)" -- bad
 
-expected = "0"
-theLambda = "P(S0)"
+-- expected =  "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)"
+-- theLambda = "Lx.(Ls.Lx.s)(Lu.x)(Lu.u)" -- fail
+
+expected = "2"
+theLambda = "S(S0)"
+
+--theLambda = "(Ln.Lf.Lc.n(Lg.Lh.h(gf))(Lu.c)(Lu.u))(Ls.Lx.sx)" -- good
 
 -- Literal definitions
 
@@ -56,12 +61,12 @@ predecessor = "Ln.Lf.Lx.n(Lg.Lh.h(gf))(Lu.x)(Lu.u)"
 
 data Expr =
       Var Char
-    | Unbound Char
-    | Bound Char
     | Lambda Char Expr
-    | Lambdac Char Expr (Map.Map Char Expr)
     | Apply Expr Expr
     | Empty
+    | Unbound Char
+    | Bound Char
+    | Lambdac Char Expr (Map.Map Char Expr)
   deriving (Show, Eq)
 
 -- Parse and return AST
@@ -133,31 +138,57 @@ eval :: Expr -> (Map.Map Char Expr) -> Expr
 
 eval (Var x) env =
     -- trace ("eval Var: " ++ show (x, env))
-    (Map.findWithDefault (Unbound x) x env)
+    -- (Map.findWithDefault (Unbound x) x env)
+    let
+        rval = (Map.findWithDefault (Unbound x) x env) -- shouldn't really have a default value
+    in
+    trace ("eval Var: " ++ show x ++ " = " ++ show rval)
+    rval 
 
 eval (Bound x) env =
---    Bound x
-    -- trace ("eval Bound: " ++ show (x, env))
-    (Map.findWithDefault (Unbound x) x env) -- shouldn't really have a default value
+    let
+        rval = (Map.findWithDefault (Unbound x) x env) -- shouldn't really have a default value
+    in
+    trace ("eval Bound: " ++ show x ++ " = " ++ show rval)
+    rval 
 
 eval (Unbound x) env = Unbound x
 
--- lambda definition, insert variable in environment and evaluate body:
+-- lambda definition, insert variable in environment, evaluate body, return closure:
 
 eval (Lambda x e) env =
-    -- trace ("eval: lambda " ++ show x)
-    (Lambdac x (eval e (Map.insert x (Bound x) env)) env )
+    let
+        env2 = (Map.insert x (Bound x) env)
+        rval = (Lambdac x (eval e env2) env )
+    in
+    trace ("eval Lambda: " ++ show x ++ " " ++ show e
+        ++ "\n  env: " ++ show env
+        ++ "\n  rval: " ++ show rval)
+    rval
     -- (Lambda x (eval e (Map.insert x (Bound x) env))  )
 
+-- evaluate closure. *** Not clear whether closure or passed environment should be used here! Both work for different cases.
+
 eval (Lambdac x e c) env =
-    -- trace ("eval: lambda " ++ show x)
-    (Lambdac x (eval e (Map.insert x (Bound x) env)) env )
+    let
+        cenv = Map.union c env
+        env2 = Map.insert x (Bound x) env
+        e2 = (eval e env2)
+        rval = (Lambdac x e2 env)
+    in
+    trace ("eval Lambdac: " ++ (show x) ++ (show e)
+        ++ "\n  e2: " ++ show e2
+        ++ "\n  env: " ++ (show (Map.findWithDefault (Var 'Z') x env2))
+        ++ "\n  returns: " ++ show (strip rval))
+    rval
 
 -- application, evaluate both parts then call beta reduction
 
 eval (Apply a b) env =
-    -- trace ("eval: apply" ++ show (a,b))
-    (beta (Apply (eval a env) (eval b env)) env)
+    trace ("eval apply: "
+        ++ "\n  " ++ show a
+        ++ "\n  " ++ show b)
+    beta (Apply (eval a env) (eval b env)) env
 
 eval e env =
     error ("eval: cannot match: " ++ show e)
@@ -168,18 +199,26 @@ beta :: Expr -> (Map.Map Char Expr) -> Expr
 
 -- if lambda application, then variable substituation and evaluate:
 
-beta (Apply (Lambdac x e closure) a) env = 
-    -- trace ("lambdac application: " ++ show (Map.insert x (eval a env) closure))
-    (eval e (Map.insert x (eval a env) (Map.union closure env)))
+beta (Apply (Lambdac x e closure) a) env =
+    let
+        env2 = (Map.insert x (eval a env) (Map.union closure env))
+        rval = (eval e env2)
+    in
+    trace ("beta: " ++ show x ++ " = " ++ show e
+        ++ "\n  env: " ++ show env2
+        ++ "\n  returns: " ++ show (strip rval) )
+    --(eval e (Map.insert x (eval a env) (Map.union closure Map.empty)))
+    rval
     --(eval e (Map.insert x (eval a env) env))
 
-beta (Apply (Lambda x e) a) env =
-    -- trace ("lambdac application: " ++ show (Map.insert x (eval a env) env))
-    (eval e (Map.insert x (eval a env) env))
+--beta (Apply (Lambda x e) a) env =
+--    -- trace ("lambdac application: " ++ show (Map.insert x (eval a env) env))
+--    (eval e (Map.insert x (eval a env) env))
 
 -- otherwise no further reduction
 
 beta e env = e
+--beta e env = error ("beta called with no possible match.")
 
 -- strip closure for nicer printing
 

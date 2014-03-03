@@ -1,4 +1,4 @@
-module Evaluate where
+module Eval1 where
 
 import qualified Data.Map    as Map
 import           Debug.Trace

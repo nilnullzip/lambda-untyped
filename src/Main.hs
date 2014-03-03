@@ -5,7 +5,7 @@ module Main where
 
 import qualified Data.Map    as Map
 import           Debug.Trace
-import           Evaluate
+import           Eval1
 import           Parse
 
 -- The Lambda expression to parse

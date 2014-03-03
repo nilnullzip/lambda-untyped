@@ -1,3 +1,3 @@
 run:
-	cd src;	runhaskell *.hs
+	cd src;	runhaskell Main.hs *.hs
 

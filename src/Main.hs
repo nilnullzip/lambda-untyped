@@ -52,13 +52,28 @@ Still some problem with variable naming. Substituting c for x above works correc
 --expected = "2"
 --theLambda = "S(S0)"
 
-expected = "0"
-theLambda = "P(1)"
+--expected = "0"
+--expected = "(Ln.Lf.Lx.n(Lg.Lh.h(gf))(Lu.x)(Lu.u))(Lf.Ls.fs)" -- hanging?
 
---expected = "S0"
---theLambda = "P(S0)"
+--expected =  "Lx.(Ls.Lz.sz)(Lg.Lh.g)a"
+--theLambda = "Lx.(Ly.Lx.yx)(Lg.Lh.g)a"
 
---theLambda = "(Ln.Lf.Lc.n(Lg.Lh.h(gf))(Lu.c)(Lu.u))(Ls.Lx.sx)" -- good
+--theLambda = "Lx.(Lx.(Lg.Lh.g)x)a"
+--theLambda = "Lx.(Lz.(Lg.Lh.g)z)a"
+
+--expected = "0"
+--theLambda = "P(S0)" -- fail
+
+--expected = "(Ln.Lf.Lc.n(Lg.Lh.h(gf))(Lu.c)(Lu.u))(Ls.Lz.sz)" -- good
+--theLambda = "(Ln.Lf.Lc.n(Lg.Lh.h(gf))(Lu.c)(Lu.u))(Ly.Lx.yx)" -- good
+
+--expected =  "Lx.(Lz.(Lg.Lh.g)z)(Lu.x)a" -- pass
+--theLambda = "Lx.(Lx.(Lg.Lh.g)x)(Lu.x)a" -- fail
+
+-- This one fails because we throw away closure association upon parsing lambda.
+
+expected  = "Lx.(Ly.yy)(Lu.x)"
+theLambda = "Lx.(Lx.xx)(Lu.x)"
 
 -- Literal definitions
 
@@ -161,13 +176,13 @@ eval (Var x) env =
         rval = (Map.findWithDefault (Unbound x) x env)
     in
     trace ("eval Var: " ++ show x ++ " = " ++ show rval)
-    rval 
+    rval
 
 eval (Bound x) env =
     let
-        rval = (Map.findWithDefault (Bound x) x env)
-        --lookup = (Map.findWithDefault Empty x env)
-        --rval = if lookup /= Empty then lookup else error ("eval Bound: variable lookup failed.")
+        --rval = (Map.findWithDefault (Bound x) x env)
+        lookup = (Map.findWithDefault Empty x env)
+        rval = if lookup /= Empty then lookup else trace ("eval Bound: **** lookup failed. **** " ++ show x) (Bound x) 
     in
     trace ("eval Bound: " ++ show x ++ " = " ++ show rval)
     rval 
@@ -181,7 +196,7 @@ eval (Lambda x e) env =
         env2 = (Map.insert x (Bound x) env)
         e2 = (eval e env2) -- is this necessary? Can't we just leave unevaluated?
         --rval = (Closure x e2 env2 )
-        env3 = Map.filter (isNotBound) env2
+        env3 = Map.filter (isNotBound) env2 -- no bound variables in closure
         rval = (Closure x e2 env3)
     in
     trace ("eval Lambda: " ++ show x ++ " " ++ show e
@@ -191,16 +206,17 @@ eval (Lambda x e) env =
     rval
     -- (Lambda x (eval e (Map.insert x (Bound x) env))  )
 
--- evaluate closure. *** Not clear whether closure or passed environment should be used here! Both work for different cases.
+-- evaluate closure.
 
 eval (Closure x e c) env =
     let
-        cenv = Map.union c env
+        cenv = Map.insert x (Bound x) (Map.union c env)
         --env2 = Map.insert x (Bound x) env
         --e2 = (eval e env2)
         --rval = (Closure x e2 env)
+        cenv2 = Map.filter (isNotBound) cenv -- eliminate any bound variables in closure
         e2 = (eval e cenv)
-        rval = (Closure x e2 cenv)
+        rval = (Closure x e2 cenv2)
     in
     trace ("eval Closure: " ++ (show x)
         ++ "\n  e: " ++ show e
@@ -236,6 +252,7 @@ beta (Apply (Closure x e c) a) env =
     in
     trace ("beta: " ++ show x ++ " = " ++ show a
         ++ "\n  e: " ++ show e
+        ++ "\n  c: " ++ show c
         ++ "\n  env2: " ++ show env2
         ++ "\n  returns: " ++ show (strip rval) )
     rval

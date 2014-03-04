@@ -1,7 +1,7 @@
 module Parse where
 
+import           AST
 import           Data.Char
-import qualified Data.Map  as Map
 
 -- Literal definitions
 
@@ -11,18 +11,6 @@ one  = "Ls.Lz.sz"
 two  = "Ls.Lz.s(sz)"
 successor = "Lw.Ly.Lx.y(wyx)"
 predecessor = "Ln.Lf.Lx.n(Lg.Lh.h(gf))(Lu.x)(Lu.u)"
-
--- The syntax tree
-
-data Expr =
-      Var Char
-    | Lambda Char Expr
-    | Apply Expr Expr
-    | Empty
-    | Unbound Char
-    | Bound Char
-    | Closure Char Expr (Map.Map Char Expr)
-  deriving (Show, Eq)
 
 -- Parser
 

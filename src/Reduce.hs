@@ -1,19 +1,73 @@
-module Eval1 where
+module Reduce where
 
+import           AST
 import qualified Data.Map    as Map
 import           Debug.Trace
 import           Parse
 
--- helper
+data Binding = Binding Char Expr deriving (Show)
 
-isNotBound :: Expr -> Bool
-isNotBound (Bound _) = False
-isNotBound _ = True
+-- get stack index for variable
 
--- expression and environment returns expression:
+search :: Char -> [Binding] -> Int
+search x [] =
+    (trace ("unbound" ++ show x) )
+     0 -- unbound
+search x ((Binding y _):s)
+    | x == y = (trace $ "search found: " ++ show x ) 1
+    | r == 0 = (trace $ "search unbound: " ++ show x ) 0
+    | otherwise = 1 + r
+    where r = search x s
 
-eval :: Expr -> (Map.Map Char Expr) -> Expr
+-- get variable value via stack index
 
+get :: Char -> Int -> [Binding] -> Expr
+get x 1 (b:s) =
+    let
+        Binding y e = b
+    in
+        if x==y then e else error $ "get: variable names do not match. Looking for: " ++ [x] ++ " got: " ++ [y]
+get x i (b:s) = get x (i-1) s
+get _ _ _ = error ("get: did not find value")
+
+-- expression and stack returns expression:
+
+reduce :: Expr -> [Binding] -> Expr
+
+reduce (Var x) s =
+    trace ("reduce Var: " ++ show x ++ " = " ++ show r)
+    r
+    where r = Bound x (search x s)
+
+reduce (Bound x i) s =
+    let
+        lu = if i==0 then (Bound x i) else get x i s
+        r = if lu == Empty then (Bound x i) else lu
+    in
+    trace ("reduce Bound: " ++ show x ++ " " ++ show i ++ " = " ++ show r) $
+    r
+
+reduce (Lambda x e) s =
+    trace ("reduce Lambda: " ++ show x ++ " " ++ show r)
+    r
+    where
+        r = Lambda x (reduce e (Binding x Empty : s))
+
+reduce (Apply f e) s = beta (reduce f s) (reduce e s) s
+
+reduce e s = e
+
+beta (Lambda x f) e s =
+    trace ("beta: " ++ show x ++ " = " ++ show e ++ " f: " ++ show f)
+    reduce f s2
+    where 
+        s2 = (Binding x e):s
+
+beta f e s = Apply f e
+
+--beta f e s
+
+{-
 -- variable, lookup variable in environment:
 
 eval (Var x) env =
@@ -113,8 +167,4 @@ beta (Apply (Closure x e c) a) env =
 beta e env = e
 --beta e env = error ("beta called with no possible match.")
 
--- strip closure for nicer printing
-
-strip :: Expr -> Expr
-strip (Closure x e c) = (Lambda x (strip e))
-strip e = e
+-}

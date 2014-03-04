@@ -3,15 +3,17 @@
 
 module Main where
 
+import           AST
 import qualified Data.Map    as Map
 import           Debug.Trace
-import           Eval1
+import           Reduce
 import           Parse
+import Test
 
 -- The Lambda expression to parse
 
-expected  = "Lx.(Ly.yy)(Lu.x)"
-theLambda = "Lx.(Lx.xx)(Lu.x)"
+expected  = "Ly.y"
+theLambda = "(Lx.xx)Ly.y"
 
 -- The entry point
 
@@ -19,6 +21,10 @@ main :: IO ()
 main = do
     putStrLn "Juan's Lambda calculus interpreter!"
     putStrLn ""
+    runtests
+
+{-
+foo = do
     putStrLn "The lambda expression:"
     print theLambda
     putStrLn ""
@@ -29,7 +35,8 @@ main = do
     print (parse theLambda)
     putStrLn ""
     putStrLn "The expected reduced AST:"
-    print (strip (eval (parse expected) Map.empty))
+    print (strip (reduce (parse expected) []))
     putStrLn ""
     putStrLn "Fully reduced AST:"
-    print (strip (eval (parse theLambda) Map.empty))
+    print (strip (reduce (parse theLambda) []))
+-}

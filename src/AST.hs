@@ -11,23 +11,25 @@ data Expr =
     | Apply Expr Expr
     | Empty
     | Bound Char Int
-    | Lambdam Char Expr
---    | Unbound Char
---    | Closure Char Expr (Map.Map Char Expr)
   deriving (Show, Eq)
 
 -- strip closure for nicer printing
 
 strip :: Expr -> Expr
---strip (Closure x e c) = (Lambda x (strip e))
 strip e = e
 
--- helper
+-- Print De Bruijn index forms
 
---isNotBound :: Expr -> Bool
---isNotBound (Bound _) = False
---isNotBound _ = True
+pdbi :: Expr -> String
 
-isLambda :: Expr -> Bool
-isLambda (Lambda _ _) = True
-isLambda _ = False
+pdbi (Bound x i) =
+    let
+        is = show i
+    in
+        if i==0 then [x]
+        else if length(is) == 1 then is
+        else "{" ++ is ++ "}"
+
+pdbi (Lambda x e) = "L." ++ pdbi e
+
+pdbi (Apply a b) = "(" ++ pdbi a ++ ")(" ++ pdbi b ++ ")"

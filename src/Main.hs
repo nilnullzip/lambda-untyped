@@ -6,9 +6,9 @@ module Main where
 import           AST
 import qualified Data.Map    as Map
 import           Debug.Trace
-import           Reduce
 import           Parse
-import Test
+import           Reduce
+import           Test
 
 -- The Lambda expression to parse
 
@@ -21,7 +21,9 @@ main :: IO ()
 main = do
     putStrLn "Juan's Lambda calculus interpreter!"
     putStrLn ""
-    runtests
+    print "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)"
+    print (strip (reduce (parse "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)") []))
+    --runtests
 
 {-
 foo = do

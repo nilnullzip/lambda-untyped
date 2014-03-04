@@ -10,9 +10,11 @@ data Binding = Binding Char Expr deriving (Show)
 -- get stack index for variable
 
 search :: Char -> [Binding] -> Int
+
 search x [] =
     (trace ("unbound" ++ show x) )
-     0 -- unbound
+    0 -- unbound
+
 search x ((Binding y _):s)
     | x == y = (trace $ "search found: " ++ show x ) 1
     | r == 0 = (trace $ "search unbound: " ++ show x ) 0
@@ -22,13 +24,32 @@ search x ((Binding y _):s)
 -- get variable value via stack index
 
 get :: Char -> Int -> [Binding] -> Expr
+
 get x 1 (b:s) =
     let
         Binding y e = b
     in
         if x==y then e else error $ "get: variable names do not match. Looking for: " ++ [x] ++ " got: " ++ [y]
+
 get x i (b:s) = get x (i-1) s
+
 get _ _ _ = error ("get: did not find value")
+
+-- adjust De Bruijn indexes
+
+adjust :: Int -> Int -> Expr -> Expr
+
+adjust d ad (Lambda x e) = Lambda x (adjust (d+1) ad e)
+
+adjust d ad (Apply a b) = Apply (adjust d ad a) (adjust d ad b)
+
+adjust d ad (Bound x 0) = Bound x 0
+
+adjust d ad (Bound x i) =
+    if i>d then Bound x i
+    else
+        trace ("adjust: " ++ show x ++ " " ++ show i ++ " -> " ++ show (i+ad))
+        Bound x (i+ad)
 
 -- expression and stack returns expression:
 
@@ -41,7 +62,9 @@ reduce (Var x) s =
 
 reduce (Bound x i) s =
     let
-        lu = if i==0 then (Bound x i) else get x i s
+        -- _ = trace ("Bound looking for " ++ show x ++ " at index " ++ show i)
+        lu = trace ("Bound looking for " ++ show x ++ " at index " ++ show i ++ " in stack " ++ show s) $
+            if i==0 then (Bound x i) else get x i s
         r = if lu == Empty then (Bound x i) else lu
     in
     trace ("reduce Bound: " ++ show x ++ " " ++ show i ++ " = " ++ show r) $
@@ -59,7 +82,7 @@ reduce e s = e
 
 beta (Lambda x f) e s =
     trace ("beta: " ++ show x ++ " = " ++ show e ++ " f: " ++ show f)
-    reduce f s2
+    reduce (adjust 0 (-1) f) s2
     where 
         s2 = (Binding x e):s
 

@@ -43,10 +43,6 @@ parseTerm ('(':s)
     | otherwise = error ("parseTerm: missing right paren: " ++ r)
     where (e,r) = parseApply Empty s
 
---    | r /= "" && (head r) == ')' = ((parse e) , tail r)
---    where (e,r) = break (== ')') s
---    error ("parseTerm: e,r = " ++ e ++ " " ++ r)
-
 -- Lambda:
 
 parseTerm ('L':x:'.':e) | (isLower x) =

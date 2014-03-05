@@ -32,4 +32,12 @@ pdbi (Bound x i) =
 
 pdbi (Lambda x e) = "L." ++ pdbi e
 
-pdbi (Apply a b) = "(" ++ pdbi a ++ ")(" ++ pdbi b ++ ")"
+pdbi (Apply a b) = paren a ++ paren b
+
+paren :: Expr -> String
+
+paren (Bound x i) = pdbi (Bound x i)
+
+paren (Lambda x e) = pdbi (Lambda x e)
+
+paren e = "(" ++ pdbi e ++ ")"

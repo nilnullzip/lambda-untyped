@@ -21,9 +21,11 @@ main :: IO ()
 main = do
     putStrLn "Juan's Lambda calculus interpreter!"
     putStrLn ""
-    print "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)"
-    print (strip (reduce (parse "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)") []))
-    --runtests
+    --print "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)"
+    --print (strip (reduce (parse "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)") []))
+    --print "Lc.(Ls.Lx.s)(Lu.c)z"
+    --print (strip (reduce (parse "Lc.(Ls.Lx.s)(Lu.c)z") []))
+    runtests
 
 {-
 foo = do

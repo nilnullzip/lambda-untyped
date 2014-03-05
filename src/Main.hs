@@ -17,7 +17,6 @@ main :: IO ()
 main = do
     putStrLn "\n\nJuan's Lambda calculus interpreter!"
     putStrLn ""
-    --runtests
     repl
 
 prompt :: String -> IO String
@@ -31,6 +30,7 @@ repl = do
     l <- prompt "> "
     if l=="" then repl
     else if l=="?" then help
+    else if l=="?t" then runtests
     else do
         putStrLn $ "De Bruijn:   " ++ (pdbi (reduce (parse l) []))
         putStrLn ""

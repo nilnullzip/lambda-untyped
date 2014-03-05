@@ -23,7 +23,8 @@ setBodyHtml = ffi "document.body.innerHTML = %1"
 main :: Fay ()
 main = do
   putStrLn "Hello Console!"
-  putStrLn (pdbi (reduce (parse "$") []))
-  --putStrLn (show (parse "1"))
+  --putStrLn (show (parse "x"))
+  putStrLn (pdbi(reduce (parse "Y(Lr.Ln.Zn0(n+(r(-n))))3") []))
+
   --alert "Hello Alert!"
   --addWindowEvent "load" greet

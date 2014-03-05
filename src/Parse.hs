@@ -70,14 +70,24 @@ parseTerm (x:r) | (isLower x) = (Var x, r)
 -- Literals :
 
 parseTerm (x:r) | x == 'I' = (parse(identity), r)
+
 parseTerm (x:r) | x == '0' = (parse(zero), r)
 parseTerm (x:r) | x == '1' = (parse(one), r)
 parseTerm (x:r) | x == '2' = (parse(two), r)
 parseTerm (x:r) | x == '3' = (parse(three), r)
+parseTerm (x:r) | x == '4' = (parse("S3"), r)
+parseTerm (x:r) | x == '5' = (parse("S4"), r)
+parseTerm (x:r) | x == '6' = (parse("S5"), r)
+parseTerm (x:r) | x == '7' = (parse("S6"), r)
+parseTerm (x:r) | x == '8' = (parse("S7"), r)
+parseTerm (x:r) | x == '9' = (parse("S8"), r)
+
 parseTerm (x:r) | x == 'S' = (parse(successor), r)
 parseTerm (x:r) | x == 'P' = (parse(predecessor), r)
 parseTerm (x:r) | x == 'M' = (parse(times), r)
+
 parseTerm (x:r) | x == 'Y' = (parse(yc), r)
+
 parseTerm (x:r) | x == 'T' = (parse(true), r)
 parseTerm (x:r) | x == 'F' = (parse(false), r)
 parseTerm (x:r) | x == '&' = (parse(_and), r)

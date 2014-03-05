@@ -14,13 +14,13 @@ data Binding = Binding Char Expr Int deriving (Show)
 search :: Char -> [Binding] -> Int
 
 search x [] =
-    (trace ("unbound" ++ show x) )
+    (jtrace ("unbound" ++ show x) )
     0 -- unbound
 
 search x ((Binding y _ i):s)
     | i /= -10 = error ("search: error. found value binding, expected only unbound parameter.")
-    | x == y = (trace $ "search found: " ++ show x) 1
-    | r == 0 = (trace $ "search unbound: " ++ show x ) 0
+    | x == y = (jtrace $ "search found: " ++ show x) 1
+    | r == 0 = (jtrace $ "search unbound: " ++ show x ) 0
     | otherwise = 1 + r
     where r = search x s
 
@@ -49,10 +49,10 @@ adjust d ad (Apply a b) = Apply (adjust d ad a) (adjust d ad b)
 adjust d ad (Bound x 0) = Bound x 0
 
 adjust d ad (Bound x i) =
-    trace ("adjust: " ++ show x ++ " i: " ++ show i ++ " depth: " ++ show d) $
+    jtrace ("adjust: " ++ show x ++ " i: " ++ show i ++ " depth: " ++ show d) $
     if i<=d then Bound x i
     else
-        trace ("adjust: " ++ show x ++ " " ++ show i ++ " -> " ++ show (i+ad))
+        jtrace ("adjust: " ++ show x ++ " " ++ show i ++ " -> " ++ show (i+ad))
         Bound x (i+ad)
 
 adjust _ _ a = error $ "adjust: unexpected term: " ++ show a
@@ -62,26 +62,26 @@ adjust _ _ a = error $ "adjust: unexpected term: " ++ show a
 reduce :: Expr -> [Binding] -> Expr
 
 reduce (Var x) s =
-    trace ("reduce Var: " ++ show x ++ " = " ++ show r)
+    jtrace ("reduce Var: " ++ show x ++ " = " ++ show r)
     r
     where r = Bound x (search x s)
 
 reduce (Bound x i) s =
     let
-        -- _ = trace ("Bound looking for " ++ show x ++ " at index " ++ show i)
+        -- _ = jtrace ("Bound looking for " ++ show x ++ " at index " ++ show i)
         (g, j) = get x i s
         adj = (length s) - j
-        lu = trace ("Bound looking for " ++ show x ++ " at index " ++ show i ++ " in stack " ++ show s) $
+        lu = jtrace ("Bound looking for " ++ show x ++ " at index " ++ show i ++ " in stack " ++ show s) $
             if i==0 then (Bound x i) -- unbound
             else if g == Empty then g
-            else trace ("reduce Bound adj: " ++ show adj) adjust (0) adj g
+            else jtrace ("reduce Bound adj: " ++ show adj) adjust (0) adj g
         r = if lu == Empty then (Bound x i) else lu
     in
-    trace ("reduce Bound: " ++ show x ++ " " ++ show i ++ " = " ++ show r) $
+    jtrace ("reduce Bound: " ++ show x ++ " " ++ show i ++ " = " ++ show r) $
     r
 
 reduce (Lambda x e) s =
-    trace ("reduce Lambda: " ++ show x ++ " " ++ show r)
+    jtrace ("reduce Lambda: " ++ show x ++ " " ++ show r)
     r
     where
         r = Lambda x (reduce e ((Binding x Empty (-10)) : s))
@@ -91,9 +91,15 @@ reduce (Apply f e) s = beta (reduce f s) (reduce e s) s
 reduce e s = e
 
 beta (Lambda x f) e s =
-    trace ("beta: " ++ show x ++ " = " ++ show e ++ " f: " ++ show f)
+    jtrace ("beta: " ++ show x ++ " = " ++ show e ++ " f: " ++ show f)
     adjust 0 (-1) (reduce f s2)
     where 
         s2 = (Binding x e (length s)):s
 
 beta f e s = Apply f e
+
+-- Enable or disable tracing:
+
+--jtrace a b = trace a b
+jtrace a b = b
+

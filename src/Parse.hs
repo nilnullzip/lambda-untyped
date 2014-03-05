@@ -1,11 +1,14 @@
 module Parse where
 
 import           AST
-import           Data.Char
+--import           Data.Char
+
+isLower c = 'z' >= c && c >= 'a'
 
 -- Parser
 
 parse :: String -> Expr
+
 parse s
     | s == "" = error ("parse: syntax error: empty string")
     | otherwise = fst (parseApply t r)

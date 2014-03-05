@@ -4,8 +4,8 @@
 module Main where
 
 import           AST
-import qualified Data.Map    as Map
-import           Debug.Trace
+--import qualified Data.Map    as Map
+--import           Debug.Trace
 import           Parse
 import           Reduce
 import           Test

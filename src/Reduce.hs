@@ -1,7 +1,7 @@
 module Reduce where
 
 import           AST
-import qualified Data.Map    as Map
+--import qualified Data.Map    as Map
 import           Debug.Trace
 import           Parse
 

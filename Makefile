@@ -3,8 +3,8 @@ run:
 
 fay: .FORCE
 	mkdir -p fay
-	fay src/Fay.hs --html-wrapper --strict AST,Parse,Reduce --include src --output fay/Fay.js
-	open fay/Fay.html
+	fay src/FayLC.hs --html-wrapper --strict AST,Parse,Reduce --include src --output fay/FayLC.js
+	open fay/FayLC.html
 
 clean:
 	rm -r fay

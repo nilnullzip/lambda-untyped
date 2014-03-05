@@ -1,4 +1,4 @@
-module LambdaCalcFay where
+module FayLC where
 
 import FFI
 import AST

@@ -1,8 +1,5 @@
 module AST where
 
---import           Data.Char
---import qualified Data.Map  as Map
-
 -- The syntax tree
 
 data Expr =

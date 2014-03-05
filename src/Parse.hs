@@ -1,7 +1,6 @@
 module Parse where
 
 import           AST
---import           Data.Char
 
 isLower c = 'z' >= c && c >= 'a'
 

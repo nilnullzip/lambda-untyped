@@ -9,8 +9,10 @@ identity = "Lz.z"
 zero = "Ls.Lz.z"
 one  = "Ls.Lz.sz"
 two  = "Ls.Lz.s(sz)"
+three  = "Ls.Lz.s(s(sz))"
 successor = "Lw.Ly.Lx.y(wyx)"
 predecessor = "Ln.Lf.Lx.n(Lg.Lh.h(gf))(Lu.x)(Lu.u)"
+times = "(Lx.Ly.Lz.x(yz))"
 
 -- Parser
 
@@ -58,8 +60,10 @@ parseTerm (x:r) | x == 'I' = (parse(identity), r)
 parseTerm (x:r) | x == '0' = (parse(zero), r)
 parseTerm (x:r) | x == '1' = (parse(one), r)
 parseTerm (x:r) | x == '2' = (parse(two), r)
+parseTerm (x:r) | x == '3' = (parse(three), r)
 parseTerm (x:r) | x == 'S' = (parse(successor), r)
 parseTerm (x:r) | x == 'P' = (parse(predecessor), r)
+parseTerm (x:r) | x == '*' = (parse(times), r)
 
 -- Syntax error:
 

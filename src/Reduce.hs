@@ -9,7 +9,7 @@ import           Parse
 
 data Binding = Binding Char Expr Int deriving (Show)
 
--- get stack index for variable
+-- get stack index by variable name
 
 search :: Char -> [Binding] -> Int
 

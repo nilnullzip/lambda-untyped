@@ -13,12 +13,7 @@ data Expr =
     | Bound Char Int
   deriving (Show, Eq)
 
--- strip closure for nicer printing
-
-strip :: Expr -> Expr
-strip e = e
-
--- Print De Bruijn index forms
+-- Print in De Bruijn index form
 
 pdbi :: Expr -> String
 

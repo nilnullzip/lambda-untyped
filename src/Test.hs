@@ -27,8 +27,9 @@ tests = [
     ("P(S0)", "0"),
     ("P0", "0"),
     ("(Ln.Lf.Lx.n(Lg.Lh.h(gf))(Lu.x)(Lu.u))(Lf.Ls.fs)", "0"), -- hanging?
-    ("2S1","3"),
-    ("*22","2S2"),
+    ("2S1","3"), -- addition
+    ("M22","2S2"), -- multiplication
+    ("2P3","1"), -- subtraction
     ("x","x")
     ]
 
@@ -58,5 +59,8 @@ runtests =
     do
         putStrLn ("")
         putStrLn ("Running tests")
+        foreach tests runtest
+        putStrLn ("")
+        putStrLn ("Running tests too")
         foreach tests runtest
 

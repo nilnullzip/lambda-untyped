@@ -14,12 +14,16 @@ import           Test
 
 main :: IO ()
 main = do
-    putStrLn "Juan's Lambda calculus interpreter!"
+    putStrLn "\n\nJuan's Lambda calculus interpreter!"
     putStrLn ""
     --print "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)"
     --print (strip (reduce (parse "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)") []))
-    runtests
-    runtests
+    --runtests
+    --runtests
+    l <- getLine
+    putStrLn (pdbi (reduce (parse l) []))
+    main
+    --print "foo"
 
 {-
 -- The Lambda expression to parse

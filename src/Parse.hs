@@ -6,6 +6,7 @@ import           Data.Char
 -- Literal definitions
 
 identity = "Lz.z"
+
 zero = "Ls.Lz.z"
 one  = "Ls.Lz.sz"
 two  = "Ls.Lz.s(sz)"
@@ -13,6 +14,18 @@ three  = "Ls.Lz.s(s(sz))"
 successor = "Lw.Ly.Lx.y(wyx)"
 predecessor = "Ln.Lf.Lx.n(Lg.Lh.h(gf))(Lu.x)(Lu.u)"
 times = "(Lx.Ly.Lz.x(yz))"
+
+true = "Lx.Ly.x" -- T
+false = "Lx.Ly.y" -- F
+_and = "Lx.Ly.xyF" -- &
+_or = "Lx.Ly.xTy" -- |
+_not = "Lx.xFT" -- ~
+
+iszero = "Lx.xF~F" -- Z
+gt = "Lx.Ly.Z(xPy)" -- >
+eq = "(Lx.Ly.&(Z(xPy))(Z(yPx)))" -- =
+
+yc = "Lf.(Lx.f(xx))(Lx.f(xx))" -- Y combinator
 
 -- Parser
 
@@ -63,7 +76,16 @@ parseTerm (x:r) | x == '2' = (parse(two), r)
 parseTerm (x:r) | x == '3' = (parse(three), r)
 parseTerm (x:r) | x == 'S' = (parse(successor), r)
 parseTerm (x:r) | x == 'P' = (parse(predecessor), r)
-parseTerm (x:r) | x == '*' = (parse(times), r)
+parseTerm (x:r) | x == 'M' = (parse(times), r)
+parseTerm (x:r) | x == 'Y' = (parse(yc), r)
+parseTerm (x:r) | x == 'T' = (parse(true), r)
+parseTerm (x:r) | x == 'F' = (parse(false), r)
+parseTerm (x:r) | x == '&' = (parse(_and), r)
+parseTerm (x:r) | x == '|' = (parse(_or), r)
+parseTerm (x:r) | x == '~' = (parse(_not), r)
+parseTerm (x:r) | x == 'Z' = (parse(iszero), r)
+parseTerm (x:r) | x == '>' = (parse(gt), r)
+parseTerm (x:r) | x == '=' = (parse(eq), r)
 
 -- Syntax error:
 

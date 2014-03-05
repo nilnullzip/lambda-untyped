@@ -9,18 +9,20 @@ isLower c = 'z' >= c && c >= 'a'
 
 parse :: String -> Expr
 
-parse s
-    | s == "" = error ("parse: syntax error: empty string")
-    | otherwise = fst (parseApply t r)
+parse "" = error ("parse: syntax error: empty string")
+
+parse s = fst (parseApply t r)
     where (t,r) = parseTerm s
 
 -- Left associative expression application
 
 parseApply :: Expr -> String -> (Expr, String)
 
+parseApply acc "" = {- trace "parseLeft: EOS" -} (acc, "")
+
+parseApply acc (')':s) = (acc, ')':s)
+
 parseApply acc s
-    | s == "" = {- trace "parseLeft: EOS" -} (acc, "")
-    | head s == ')' = (acc, s)
     | acc == Empty = (parseApply t r)
     | otherwise = {- trace "parseLeft: Apply" -} (parseApply (Apply acc t) r)
     where (t,r) = parseTerm s
@@ -28,6 +30,8 @@ parseApply acc s
 -- Parse a term
 
 parseTerm :: String -> (Expr, String)
+
+--parseTerm s = error ("parseTerm: string=" ++ s)
 
 -- Parens:
 

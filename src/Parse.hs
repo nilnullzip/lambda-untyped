@@ -22,10 +22,16 @@ _or = "Lx.Ly.xTy" -- |
 _not = "Lx.xFT" -- ~
 
 iszero = "Lx.xF~F" -- Z
-gt = "Lx.Ly.Z(xPy)" -- >
-eq = "(Lx.Ly.&(Z(xPy))(Z(yPx)))" -- =
+gt = "Lx.Ly.Z(x-(+y))" -- >
+lt = "Lx.Ly.Z(y-(+x))" -- <
+ge = "Lx.Ly.Z(x-y)"
+eq = "(Lx.Ly.&(Z(x-y))(Z(y-x)))" -- =
 
 yc = "Lf.(Lx.f(xx))(Lx.f(xx))" -- Y combinator
+
+cons = "Lx.Ly.Lf.fxy"
+car = "Lp.pT"
+cdr = "Lp.pF"
 
 -- Parser
 
@@ -70,32 +76,37 @@ parseTerm (x:r) | (isLower x) = (Var x, r)
 -- Literals :
 
 parseTerm (x:r) | x == 'I' = (parse(identity), r)
+parseTerm (x:r) | x == 'Y' = (parse(yc), r)
 
 parseTerm (x:r) | x == '0' = (parse(zero), r)
 parseTerm (x:r) | x == '1' = (parse(one), r)
 parseTerm (x:r) | x == '2' = (parse(two), r)
 parseTerm (x:r) | x == '3' = (parse(three), r)
-parseTerm (x:r) | x == '4' = (parse("S3"), r)
-parseTerm (x:r) | x == '5' = (parse("S4"), r)
-parseTerm (x:r) | x == '6' = (parse("S5"), r)
-parseTerm (x:r) | x == '7' = (parse("S6"), r)
-parseTerm (x:r) | x == '8' = (parse("S7"), r)
-parseTerm (x:r) | x == '9' = (parse("S8"), r)
+parseTerm (x:r) | x == '4' = (parse("+3"), r)
+parseTerm (x:r) | x == '5' = (parse("+4"), r)
+parseTerm (x:r) | x == '6' = (parse("+5"), r)
+parseTerm (x:r) | x == '7' = (parse("+6"), r)
+parseTerm (x:r) | x == '8' = (parse("+7"), r)
+parseTerm (x:r) | x == '9' = (parse("+8"), r)
 
-parseTerm (x:r) | x == 'S' = (parse(successor), r)
-parseTerm (x:r) | x == 'P' = (parse(predecessor), r)
-parseTerm (x:r) | x == 'M' = (parse(times), r)
-
-parseTerm (x:r) | x == 'Y' = (parse(yc), r)
+parseTerm (x:r) | x == '+' = (parse(successor), r)
+parseTerm (x:r) | x == '-' = (parse(predecessor), r)
+parseTerm (x:r) | x == '*' = (parse(times), r)
 
 parseTerm (x:r) | x == 'T' = (parse(true), r)
 parseTerm (x:r) | x == 'F' = (parse(false), r)
 parseTerm (x:r) | x == '&' = (parse(_and), r)
 parseTerm (x:r) | x == '|' = (parse(_or), r)
 parseTerm (x:r) | x == '~' = (parse(_not), r)
+
 parseTerm (x:r) | x == 'Z' = (parse(iszero), r)
 parseTerm (x:r) | x == '>' = (parse(gt), r)
+parseTerm (x:r) | x == '<' = (parse(lt), r)
 parseTerm (x:r) | x == '=' = (parse(eq), r)
+
+parseTerm (x:r) | x == 'C' = (parse(cons), r)
+parseTerm (x:r) | x == 'A' = (parse(car), r)
+parseTerm (x:r) | x == 'D' = (parse(cdr), r)
 
 -- Syntax error:
 

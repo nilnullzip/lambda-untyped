@@ -9,6 +9,7 @@ import           Debug.Trace
 import           Parse
 import           Reduce
 import           Test
+import System.IO
 
 -- The entry point
 
@@ -16,34 +17,37 @@ main :: IO ()
 main = do
     putStrLn "\n\nJuan's Lambda calculus interpreter!"
     putStrLn ""
-    --print "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)"
-    --print (strip (reduce (parse "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)") []))
     --runtests
-    --runtests
-    l <- getLine
-    putStrLn (pdbi (reduce (parse l) []))
-    main
-    --print "foo"
+    repl
 
-{-
--- The Lambda expression to parse
+prompt :: String -> IO String
+prompt p = do
+    putStr p
+    hFlush stdout
+    getLine
 
-expected  = "Ly.y"
-theLambda = "(Lx.xx)Ly.y"
+repl :: IO ()
+repl = do
+    l <- prompt "> "
+    if l=="" then repl
+    else if l=="?" then help
+    else putStrLn (pdbi (reduce (parse l) []))
+    repl
 
-foo = do
-    putStrLn "The lambda expression:"
-    print theLambda
+help :: IO ()
+help = do
+    putStrLn "Input format (1): Lf.Lx.fx"
     putStrLn ""
-    putStrLn "The expected AST:"
-    print (parse expected)
+    putStrLn "Results printed in De Bruijn format (1): L.L.21"
     putStrLn ""
-    putStrLn "The AST:"
-    print (parse theLambda)
+    putStrLn "Literals:"
+    putStrLn "numbers:    0 1 2 3 4 5 6 7 8 9"
+    putStrLn "arithmetic: + - *"
+    putStrLn "inequality: Z > < ="
+    putStrLn "logical:    T F & | ~"
+    putStrLn "pairs:      C A D"
+    putStrLn "recursion:  Yf = f(Yf)"
+    putStrLn "identity:   If = f"
     putStrLn ""
-    putStrLn "The expected reduced AST:"
-    print (strip (reduce (parse expected) []))
+    putStrLn "Example recursion, sum the first three integers: Y(Lr.Ln.Zn0(n+(r(-n))))3"
     putStrLn ""
-    putStrLn "Fully reduced AST:"
-    print (strip (reduce (parse theLambda) []))
--}

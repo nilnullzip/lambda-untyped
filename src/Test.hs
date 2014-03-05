@@ -11,9 +11,9 @@ foreach = flip mapM_
 tests = [
     ("Lx.(Ls.Lx.s)(Lu.x)(Lu.u)", "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)"),
     ("(Lx.xx)Ly.y", "Ly.y"),
-    ("S0", "1"),
-    ("S(S0)", "2"),
-    ("P((Lw.Ly.Lx.y(wyx))0)", "P((Lw.Ly.Lc.y(wyc))0)"),
+    ("+0", "1"),
+    ("+(+0)", "2"),
+    ("-((Lw.Ly.Lx.y(wyx))0)", "-((Lw.Ly.Lc.y(wyc))0)"),
     ("Lf.Lx.(Ly.Lx.yx)(Lg.Lh.h(gf))(Lu.x)(Lu.u)", "Lf.Lx.(Ly.Lc.yc)(Lg.Lh.h(gf))(Lu.x)(Lu.u)"),
     ("Lx.(Ls.Lx.s)(Lu.x)(Lu.u)", "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)"),
     ("(Lw.Ly.(wy))0", "Ly.(0y)"),
@@ -24,12 +24,12 @@ tests = [
     ("Lx.(Lx.xx)(Lu.x)", "Lx.(Ly.yy)(Lu.x)"),
     ("Lx.(Lx.xf)(Lu.x)", "Lx.(Lc.cf)(Lu.x)"),
     ("Lx.(Lc.(Lg.Lh.h(gf))c)(Lu.x)", "Lx.(Lx.(Lg.Lh.h(gf))x)(Lu.x)"),
-    ("P(S0)", "0"),
-    ("P0", "0"),
+    ("-(+0)", "0"),
+    ("-0", "0"),
     ("(Ln.Lf.Lx.n(Lg.Lh.h(gf))(Lu.x)(Lu.u))(Lf.Ls.fs)", "0"), -- hanging?
-    ("2S1","3"), -- addition
-    ("M22","2S2"), -- multiplication
-    ("2P3","1"), -- subtraction
+    ("2+1","3"), -- addition
+    ("*22","2+2"), -- multiplication
+    ("2-3","1"), -- subtraction
     ("x","x")
     ]
 

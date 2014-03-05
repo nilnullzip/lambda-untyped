@@ -10,11 +10,6 @@ import           Parse
 import           Reduce
 import           Test
 
--- The Lambda expression to parse
-
-expected  = "Ly.y"
-theLambda = "(Lx.xx)Ly.y"
-
 -- The entry point
 
 main :: IO ()
@@ -23,11 +18,15 @@ main = do
     putStrLn ""
     --print "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)"
     --print (strip (reduce (parse "Lc.(Ls.Lx.s)(Lu.c)(Lu.u)") []))
-    --print "Lc.(Ls.Lx.s)(Lu.c)z"
-    --print (strip (reduce (parse "Lc.(Ls.Lx.s)(Lu.c)z") []))
+    runtests
     runtests
 
 {-
+-- The Lambda expression to parse
+
+expected  = "Ly.y"
+theLambda = "(Lx.xx)Ly.y"
+
 foo = do
     putStrLn "The lambda expression:"
     print theLambda

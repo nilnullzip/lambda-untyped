@@ -3,7 +3,7 @@ module Help where
 cr = "\n"
 
 help =
-      "type '?' for help"++crl
+      "type '?' for help"++cr
     ++"otherwise type in a lambda expression."++cr
     ++cr
     ++"Input format: Lf.Lx.fx"++cr

@@ -6,4 +6,5 @@ environment: ghc-7.4.2-stable-13.09
 cabal-file: project.cabal
 version: 1
 ghc-args: []
-excluded-modules: []
+excluded-modules:
+- src/FayLC.hs

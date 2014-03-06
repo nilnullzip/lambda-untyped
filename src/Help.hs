@@ -3,7 +3,7 @@ module Help where
 cr = "\n"
 
 help =
-      "type '?' for help"
+      "type '?' for help"++crl
     ++"otherwise type in a lambda expression."++cr
     ++cr
     ++"Input format: Lf.Lx.fx"++cr
@@ -12,7 +12,8 @@ help =
     ++cr
     ++"Literals:"++cr
     ++"  numbers:    0 1 2 3 4 5 6 7 8 9"++cr
-    ++"  arithmetic: + - * ^"++cr
+    ++"  arithmetic: + - (successor and predecessor)"++cr
+    ++"  arithmetic: * ^ (prefix)"++cr
     ++"  inequality: Z > < ="++cr
     ++"  logical:    T F & | ~"++cr
     ++"  pairs:      C A D"++cr
@@ -24,7 +25,7 @@ help =
     ++"  Multiply two numbers '*23'"++cr 
     ++"  Sum the first three integers: 'Y(Lr.Ln.Zn0(n+(r(-n))))3'"++cr
     ++cr
-    ++"Results are printed in De Bruijn format: L.L.21"++cr
+    ++"Results are printed in De Bruijn format (L.L.21). Numbers are encoded as Church Numerals."++cr
     ++cr
     ++"Random:"++cr
     ++"  type '?t' to run regression tests"++cr

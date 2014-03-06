@@ -4,6 +4,7 @@ import FFI
 import AST
 import Parse
 import Reduce
+import Help
 
 alert :: String -> Fay ()
 alert = ffi "alert(%1)"
